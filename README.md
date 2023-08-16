@@ -3,3 +3,27 @@
 ## アーキテクチャ
 
 ![](img/クラスメソッド技術課題_architecture.drawio.svg)
+
+## API 仕様書の生成
+
+```
+redoc-cli bundle openapi/openapi.yaml --output openapi/app.html
+```
+
+## API のデプロイ
+
+```
+npm run build
+```
+
+```
+terraform init
+terraform plan
+terraform apply
+```
+
+## API の削除
+
+```
+terraform destroy
+```
