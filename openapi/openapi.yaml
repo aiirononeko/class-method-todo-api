@@ -10,7 +10,7 @@ paths:
       summary: Retrieve List Of TODO
       description: Retrieve List Of TODO.
       responses:
-        "200":
+        '200':
           description: List Of TODO retrieved successfully.
           content:
             application/json:
@@ -29,14 +29,14 @@ paths:
                       type: string
                     status:
                       type: string
-        "500":
+        '500':
           description: Internal Server Error.
   /todo:
     post:
       summary: Create TODO
       description: Create TODO.
       responses:
-        "200":
+        '200':
           description: TODO created successfully.
           content:
             application/json:
@@ -53,14 +53,14 @@ paths:
                     type: string
                   status:
                     type: string
-        "500":
+        '500':
           description: Internal Server Error.
   /todo/{todoId}:
     put:
       summary: Update TODO
       description: Update TODO.
       responses:
-        "200":
+        '200':
           description: TODO updated successfully.
           content:
             application/json:
@@ -77,17 +77,17 @@ paths:
                     type: string
                   status:
                     type: string
-        "404":
+        '404':
           description: TODO is not found.
-        "500":
+        '500':
           description: Internal Server Error.
     delete:
       summary: Delete TODO
       description: Delete TODO.
       responses:
-        "200":
+        '200':
           description: TODO deleted successfully.
-        "404":
+        '404':
           description: TODO is not found.
-        "500":
+        '500':
           description: Internal Server Error.

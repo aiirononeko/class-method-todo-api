@@ -1,22 +1,23 @@
 {
-  "name": "class-method-todo-api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@types/aws-lambda": "^8.10.119",
-    "@types/node": "^20.5.0",
-    "esbuild": "0.19.2"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
-    "eslint": "^8.47.0"
-  }
+	"name": "class-method-todo-api",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "./node_modules/.bin/esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@types/aws-lambda": "^8.10.119",
+		"@types/node": "^20.5.0",
+		"esbuild": "0.19.2",
+		"typescript": "^5.1.6"
+	},
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^6.4.0",
+		"@typescript-eslint/parser": "^6.4.0",
+		"eslint": "^8.47.0"
+	}
 }
