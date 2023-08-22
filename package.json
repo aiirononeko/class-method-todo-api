@@ -5,11 +5,12 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "./node_modules/.bin/esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js"
+		"build:retrieve": "./node_modules/.bin/esbuild src/retrieve/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/retrieve/index.js"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.391.0",
 		"@types/aws-lambda": "^8.10.119",
 		"@types/node": "^20.5.0",
 		"esbuild": "0.19.2",
