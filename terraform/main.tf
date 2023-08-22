@@ -85,6 +85,26 @@ resource "aws_lambda_function" "retrieve-todo" {
 }
 
 ################################
+# Lambda - Create TODO
+################################
+
+data "archive_file" "create_todo_lambda_zip" {
+  type        = "zip"
+  source_dir  = "../dist/create"
+  output_path = "dist/create/build.zip"
+}
+
+resource "aws_lambda_function" "create-todo" {
+  depends_on       = [aws_iam_role.iam_for_lambda]
+  filename         = data.archive_file.create_todo_lambda_zip.output_path
+  function_name    = "create-todo"
+  role             = aws_iam_role.iam_for_lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs18.x"
+  source_code_hash = data.archive_file.create_todo_lambda_zip.output_base64sha256
+}
+
+################################
 # API Gateway
 ################################
 
@@ -105,6 +125,17 @@ resource "aws_api_gateway_rest_api" "todo-api" {
             payloadFormatVersion = "1.0"
             type                 = "AWS_PROXY"
             uri                  = aws_lambda_function.retrieve-todo.invoke_arn
+            credentials          = aws_iam_role.api_gateway_role.arn
+          }
+        }
+      }
+      "/todo" = {
+        post = {
+          x-amazon-apigateway-integration = {
+            httpMethod           = "POST"
+            payloadFormatVersion = "1.0"
+            type                 = "AWS_PROXY"
+            uri                  = aws_lambda_function.create-todo.invoke_arn
             credentials          = aws_iam_role.api_gateway_role.arn
           }
         }
