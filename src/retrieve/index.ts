@@ -1,4 +1,4 @@
-import { Context, APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyResult } from 'aws-lambda';
 import {
 	DynamoDBClient,
 	DynamoDBClientConfig,
@@ -15,10 +15,7 @@ interface Todo {
 	status: string;
 }
 
-const handler = async (
-	event: APIGatewayEvent,
-	context: Context
-): Promise<APIGatewayProxyResult> => {
+const handler = async (): Promise<APIGatewayProxyResult> => {
 	/**
 	 * DynamoDBClient初期化
 	 */
