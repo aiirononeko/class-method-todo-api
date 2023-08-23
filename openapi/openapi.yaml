@@ -3,7 +3,8 @@ info:
   title: Class Method TODO App API
   description: Class Method TODO App API Specification.
   version: 1.0.0
-
+security:
+  - api_key: []
 paths:
   /todos:
     get:
@@ -21,20 +22,46 @@ paths:
                   properties:
                     id:
                       type: string
+                      example: '1692757218707'
                     title:
                       type: string
+                      example: 'TODOのタイトル'
                     content:
                       type: string
+                      example: 'TODOの内容'
                     expiration:
                       type: string
+                      example: '2023-08-30'
                     status:
                       type: string
+                      example: 'TODO'
+        '401':
+          description: Unauthorized.
         '500':
           description: Internal Server Error.
   /todo:
     post:
       summary: Create TODO
       description: Create TODO.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - expiration
+              properties:
+                title:
+                  type: string
+                  example: 'TODOのタイトル'
+                content:
+                  type: string
+                  example: 'TODOの内容'
+                expiration:
+                  type: string
+                  example: '2023-08-30'
       responses:
         '200':
           description: TODO created successfully.
@@ -45,20 +72,66 @@ paths:
                 properties:
                   id:
                     type: string
+                    example: '1692757218707'
                   title:
                     type: string
+                    example: 'TODOのタイトル'
                   content:
                     type: string
+                    example: 'TODOの内容'
                   expiration:
                     type: string
+                    example: '2023-08-30'
                   status:
                     type: string
+                    example: 'TODO'
+        '400':
+          description: Invalid Request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'title in requestBody is required.'
+        '401':
+          description: Unauthorized.
         '500':
           description: Internal Server Error.
   /todo/{todoId}:
     put:
       summary: Update TODO
       description: Update TODO.
+      parameters:
+        - in: path
+          name: todoId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - expiration
+                - status
+              properties:
+                title:
+                  type: string
+                  example: 'TODOのタイトル'
+                content:
+                  type: string
+                  example: 'TODOの内容'
+                expiration:
+                  type: string
+                  example: '2023-08-30'
+                status:
+                  type: string
+                  example: 'DONE'
       responses:
         '200':
           description: TODO updated successfully.
@@ -69,14 +142,31 @@ paths:
                 properties:
                   id:
                     type: string
+                    example: '1692757218707'
                   title:
                     type: string
+                    example: 'TODOのタイトル'
                   content:
                     type: string
+                    example: 'TODOの内容'
                   expiration:
                     type: string
+                    example: '2023-08-30'
                   status:
                     type: string
+                    example: 'TODO'
+        '400':
+          description: Invalid Request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'title in requestBody is required.'
+        '401':
+          description: Unauthorized.
         '404':
           description: TODO is not found.
         '500':
@@ -84,10 +174,34 @@ paths:
     delete:
       summary: Delete TODO
       description: Delete TODO.
+      parameters:
+        - in: path
+          name: todoId
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: TODO deleted successfully.
+        '400':
+          description: Invalid Request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'todoId in pathParameters is required.'
+        '401':
+          description: Unauthorized.
         '404':
           description: TODO is not found.
         '500':
           description: Internal Server Error.
+components:
+  securitySchemes:
+    api_key:
+      type: 'apiKey'
+      name: 'x-api-key'
+      in: 'header'
