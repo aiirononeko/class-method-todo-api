@@ -13,7 +13,7 @@ redoc-cli bundle openapi/openapi.yaml --output openapi/app.html
 ## API のデプロイ
 
 ```
-npm run build
+npm run build:all
 ```
 
 ```
