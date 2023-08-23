@@ -77,7 +77,7 @@ const handler = async (
 	const command = new PutItemCommand(param);
 
 	/**
-	 * データ登録
+	 * データ更新
 	 */
 	await client.send(command);
 
