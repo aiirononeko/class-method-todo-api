@@ -22,6 +22,8 @@ terraform plan
 terraform apply
 ```
 
+apiKey の有効化のみ手動で実施する
+
 ## API の削除
 
 ```
