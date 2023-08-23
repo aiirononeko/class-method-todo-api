@@ -5,20 +5,12 @@ import {
 	PutItemCommand,
 	PutItemCommandInput
 } from '@aws-sdk/client-dynamodb';
+import Todo from '../../models/todo';
 
-interface Todo {
-	id: string;
+interface CreateTodoParam {
 	title: string;
 	content: string;
 	expiration: string;
-	status: string;
-}
-
-interface UpdateTodoParam {
-	title: string;
-	content: string;
-	expiration: string;
-	status: string;
 }
 
 const handler = async (
@@ -27,11 +19,7 @@ const handler = async (
 	/**
 	 * バリデーション
 	 */
-	if (
-		event.body === null ||
-		event.pathParameters == null ||
-		event.pathParameters.todoId == undefined
-	) {
+	if (event.body === null) {
 		/**
 		 * レスポンス
 		 */
@@ -51,14 +39,13 @@ const handler = async (
 	/**
 	 * クエリ作成
 	 */
-	const todoId = event.pathParameters.todoId;
-	const requestBody: UpdateTodoParam = JSON.parse(event.body);
-	const { title, content, expiration, status } = requestBody;
+	const requestBody: CreateTodoParam = JSON.parse(event.body);
+	const { title, content, expiration } = requestBody;
 	const param: PutItemCommandInput = {
 		TableName: 'todos',
 		Item: {
 			Id: {
-				S: todoId
+				S: new Date().getTime().toString()
 			},
 			Title: {
 				S: title
@@ -70,36 +57,49 @@ const handler = async (
 				S: expiration
 			},
 			Status: {
-				S: status
+				S: 'TODO'
 			}
 		}
 	};
 	const command = new PutItemCommand(param);
 
-	/**
-	 * データ更新
-	 */
-	await client.send(command);
+	try {
+		/**
+		 * データ登録
+		 */
+		await client.send(command);
 
-	/**
-	 * レスポンスボディ整形
-	 */
-	const responseBody: Todo = {
-		id: param.Item?.Id.S ?? '',
-		title: param.Item?.Title.S ?? '',
-		content: param.Item?.Content.S ?? '',
-		expiration: param.Item?.Expiration.S ?? '',
-		status: param.Item?.Status.S ?? ''
-	};
+		/**
+		 * レスポンスボディ整形
+		 */
+		const responseBody: Todo = {
+			id: param.Item?.Id.S ?? '',
+			title: param.Item?.Title.S ?? '',
+			content: param.Item?.Content.S ?? '',
+			expiration: param.Item?.Expiration.S ?? '',
+			status: param.Item?.Status.S ?? ''
+		};
 
-	/**
-	 * レスポンス
-	 */
-	const response: APIGatewayProxyResult = {
-		statusCode: 200,
-		body: JSON.stringify(responseBody)
-	};
-	return response;
+		/**
+		 * レスポンス
+		 */
+		const response: APIGatewayProxyResult = {
+			statusCode: 200,
+			body: JSON.stringify(responseBody)
+		};
+		return response;
+	} catch (e) {
+		console.error(e);
+
+		/**
+		 * レスポンス
+		 */
+		const response: APIGatewayProxyResult = {
+			statusCode: 500,
+			body: ''
+		};
+		return response;
+	}
 };
 
 module.exports = { handler };

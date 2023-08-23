@@ -46,19 +46,32 @@ const handler = async (
 	};
 	const command = new DeleteItemCommand(param);
 
-	/**
-	 * データ削除
-	 */
-	await client.send(command);
+	try {
+		/**
+		 * データ削除
+		 */
+		await client.send(command);
 
-	/**
-	 * レスポンス
-	 */
-	const response: APIGatewayProxyResult = {
-		statusCode: 200,
-		body: ''
-	};
-	return response;
+		/**
+		 * レスポンス
+		 */
+		const response: APIGatewayProxyResult = {
+			statusCode: 200,
+			body: ''
+		};
+		return response;
+	} catch (e) {
+		console.error(e);
+
+		/**
+		 * レスポンス
+		 */
+		const response: APIGatewayProxyResult = {
+			statusCode: 500,
+			body: ''
+		};
+		return response;
+	}
 };
 
 module.exports = { handler };

@@ -5,10 +5,10 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build:retrieve": "./node_modules/.bin/esbuild src/retrieve/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/retrieve/index.js",
-		"build:create": "./node_modules/.bin/esbuild src/create/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/create/index.js",
-		"build:update": "./node_modules/.bin/esbuild src/update/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/update/index.js",
-		"build:delete": "./node_modules/.bin/esbuild src/delete/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/delete/index.js",
+		"build:retrieve": "./node_modules/.bin/esbuild src/handlers/retrieve/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/retrieve/index.js",
+		"build:create": "./node_modules/.bin/esbuild src/handlers/create/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/create/index.js",
+		"build:update": "./node_modules/.bin/esbuild src/handlers/update/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/update/index.js",
+		"build:delete": "./node_modules/.bin/esbuild src/handlers/delete/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=./dist/delete/index.js",
 		"build:all": "npm run build:retrieve && npm run build:create && npm run build:update && npm run build:delete"
 	},
 	"author": "",
