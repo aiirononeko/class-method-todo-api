@@ -3,7 +3,10 @@ import {
 	DeleteItemCommand,
 	DeleteItemCommandInput,
 	DynamoDBClient,
-	DynamoDBClientConfig
+	DynamoDBClientConfig,
+	GetItemCommand,
+	GetItemCommandInput,
+	GetItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
 const handler = async (
@@ -12,16 +15,13 @@ const handler = async (
 	/**
 	 * バリデーション
 	 */
-	if (
-		event.pathParameters == null ||
-		event.pathParameters.todoId == undefined
-	) {
+	if (!event.pathParameters || !event.pathParameters.todoId) {
 		/**
 		 * レスポンス
 		 */
 		const response: APIGatewayProxyResult = {
 			statusCode: 400,
-			body: ''
+			body: 'todoId in pathParameters is required.'
 		};
 		return response;
 	}
@@ -33,9 +33,24 @@ const handler = async (
 	const client = new DynamoDBClient(config);
 
 	/**
+	 * 対象レコード確認
+	 */
+	const todoId = event.pathParameters?.todoId ?? '';
+	const targetData = await checkTargetRecordExists(client, todoId);
+	if (!targetData.Item) {
+		/**
+		 * レスポンス
+		 */
+		const response: APIGatewayProxyResult = {
+			statusCode: 404,
+			body: ''
+		};
+		return response;
+	}
+
+	/**
 	 * クエリ作成
 	 */
-	const todoId = event.pathParameters.todoId;
 	const param: DeleteItemCommandInput = {
 		TableName: 'todos',
 		Key: {
@@ -72,6 +87,30 @@ const handler = async (
 		};
 		return response;
 	}
+};
+
+const checkTargetRecordExists = async (
+	client: DynamoDBClient,
+	todoId: string
+): Promise<GetItemCommandOutput> => {
+	/**
+	 * クエリ作成
+	 */
+	const param: GetItemCommandInput = {
+		TableName: 'todos',
+		Key: {
+			Id: {
+				S: todoId
+			}
+		}
+	};
+	const command = new GetItemCommand(param);
+
+	/**
+	 * データフェッチ
+	 */
+	const data: GetItemCommandOutput = await client.send(command);
+	return data;
 };
 
 module.exports = { handler };

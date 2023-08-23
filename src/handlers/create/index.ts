@@ -19,13 +19,14 @@ const handler = async (
 	/**
 	 * バリデーション
 	 */
-	if (event.body === null) {
+	const errorMessage = validate(event);
+	if (errorMessage) {
 		/**
 		 * レスポンス
 		 */
 		const response: APIGatewayProxyResult = {
 			statusCode: 400,
-			body: ''
+			body: errorMessage
 		};
 		return response;
 	}
@@ -39,7 +40,7 @@ const handler = async (
 	/**
 	 * クエリ作成
 	 */
-	const requestBody: CreateTodoParam = JSON.parse(event.body);
+	const requestBody: CreateTodoParam = JSON.parse(event.body ?? '');
 	const { title, content, expiration } = requestBody;
 	const param: PutItemCommandInput = {
 		TableName: 'todos',
@@ -99,6 +100,31 @@ const handler = async (
 			body: ''
 		};
 		return response;
+	}
+};
+
+const validate = (event: APIGatewayEvent): string | undefined => {
+	if (!event.body) {
+		return JSON.stringify({
+			message: 'requestBody is required.'
+		});
+	}
+	const requestBody: CreateTodoParam = JSON.parse(event.body);
+	const { title, content, expiration } = requestBody;
+	if (!title || title === '') {
+		return JSON.stringify({
+			message: 'title in requestBody is required.'
+		});
+	} else if (!content || content === '') {
+		return JSON.stringify({
+			message: 'content in requestBody is required.'
+		});
+	} else if (!expiration || expiration === '') {
+		return JSON.stringify({
+			message: 'expiration in requestBody is required.'
+		});
+	} else {
+		return undefined;
 	}
 };
 
