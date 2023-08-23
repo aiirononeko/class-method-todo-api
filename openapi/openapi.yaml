@@ -35,8 +35,16 @@ paths:
                     status:
                       type: string
                       example: 'TODO'
-        '401':
+        '403':
           description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Forbidden.'
         '500':
           description: Internal Server Error.
   /todo:
@@ -95,8 +103,16 @@ paths:
                   message:
                     type: string
                     example: 'title in requestBody is required.'
-        '401':
+        '403':
           description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Forbidden.'
         '500':
           description: Internal Server Error.
   /todo/{todoId}:
@@ -165,8 +181,16 @@ paths:
                   message:
                     type: string
                     example: 'title in requestBody is required.'
-        '401':
+        '403':
           description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Forbidden.'
         '404':
           description: TODO is not found.
         '500':
@@ -193,8 +217,16 @@ paths:
                   message:
                     type: string
                     example: 'todoId in pathParameters is required.'
-        '401':
+        '403':
           description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Forbidden.'
         '404':
           description: TODO is not found.
         '500':

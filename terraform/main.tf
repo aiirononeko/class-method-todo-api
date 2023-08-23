@@ -148,6 +148,26 @@ resource "aws_lambda_function" "delete-todo" {
 # API Gateway
 ################################
 
+resource "aws_api_gateway_api_key" "main" {
+  name = "apiKey"
+}
+
+resource "aws_api_gateway_usage_plan" "main" {
+  name       = "usage_plan"
+  depends_on = [aws_api_gateway_deployment.deployment]
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.todo-api.id
+    stage  = aws_api_gateway_deployment.deployment.stage_name
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "main" {
+  key_id        = aws_api_gateway_api_key.main.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.main.id
+}
+
 resource "aws_api_gateway_rest_api" "todo-api" {
   name = "todo-api"
 
