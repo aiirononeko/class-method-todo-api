@@ -52,6 +52,11 @@ const handler = async (): Promise<APIGatewayProxyResult> => {
 		 */
 		const response: APIGatewayProxyResult = {
 			statusCode: 200,
+			headers: {
+				'Access-Control-Allow-Headers': 'Content-Type',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+			},
 			body: JSON.stringify(responseBody)
 		};
 		return response;

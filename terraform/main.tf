@@ -154,11 +154,11 @@ resource "aws_api_gateway_api_key" "main" {
 
 resource "aws_api_gateway_usage_plan" "main" {
   name       = "usage_plan"
-  depends_on = [aws_api_gateway_deployment.deployment]
+  depends_on = [aws_api_gateway_rest_api.main, aws_api_gateway_stage.main]
 
   api_stages {
-    api_id = aws_api_gateway_rest_api.todo-api.id
-    stage  = aws_api_gateway_deployment.deployment.stage_name
+    api_id = aws_api_gateway_rest_api.main.id
+    stage  = aws_api_gateway_stage.main.stage_name
   }
 }
 
@@ -168,86 +168,154 @@ resource "aws_api_gateway_usage_plan_key" "main" {
   usage_plan_id = aws_api_gateway_usage_plan.main.id
 }
 
-resource "aws_api_gateway_rest_api" "todo-api" {
-  name = "todo-api"
-
-  body = jsonencode({
-    openapi = "3.0.1"
-    info = {
-      title   = "todo-api"
-      version = "1.0"
-    }
-    paths = {
-      "/todos" = {
-        get = {
-          x-amazon-apigateway-integration = {
-            httpMethod           = "POST"
-            payloadFormatVersion = "1.0"
-            type                 = "AWS_PROXY"
-            uri                  = aws_lambda_function.retrieve-todo.invoke_arn
-            credentials          = aws_iam_role.api_gateway_role.arn
-          }
-        }
-      }
-      "/todo" = {
-        post = {
-          x-amazon-apigateway-integration = {
-            httpMethod           = "POST"
-            payloadFormatVersion = "1.0"
-            type                 = "AWS_PROXY"
-            uri                  = aws_lambda_function.create-todo.invoke_arn
-            credentials          = aws_iam_role.api_gateway_role.arn
-          }
-        }
-      }
-      "/todo/{todoId}" = {
-        put = {
-          x-amazon-apigateway-integration = {
-            httpMethod           = "POST"
-            payloadFormatVersion = "1.0"
-            type                 = "AWS_PROXY"
-            uri                  = aws_lambda_function.update-todo.invoke_arn
-            credentials          = aws_iam_role.api_gateway_role.arn
-          }
-        }
-        delete = {
-          x-amazon-apigateway-integration = {
-            httpMethod           = "POST"
-            payloadFormatVersion = "1.0"
-            type                 = "AWS_PROXY"
-            uri                  = aws_lambda_function.delete-todo.invoke_arn
-            credentials          = aws_iam_role.api_gateway_role.arn
-          }
-        }
-      }
-    }
-  })
+resource "aws_api_gateway_rest_api" "main" {
+  name = "api"
 }
 
-resource "aws_api_gateway_deployment" "deployment" {
-  rest_api_id = aws_api_gateway_rest_api.todo-api.id
-  depends_on  = [aws_api_gateway_rest_api.todo-api]
-  stage_name  = "prod"
+resource "aws_api_gateway_resource" "tasks" {
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
+  path_part   = "tasks"
+  rest_api_id = aws_api_gateway_rest_api.main.id
+}
+
+resource "aws_api_gateway_resource" "task" {
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
+  path_part   = "task"
+  rest_api_id = aws_api_gateway_rest_api.main.id
+}
+
+resource "aws_api_gateway_method" "get_tasks" {
+  authorization    = "NONE"
+  http_method      = "GET"
+  resource_id      = aws_api_gateway_resource.tasks.id
+  rest_api_id      = aws_api_gateway_rest_api.main.id
+  api_key_required = true
+}
+
+resource "aws_api_gateway_method" "options_tasks" {
+  authorization = "NONE"
+  http_method   = "OPTIONS"
+  resource_id   = aws_api_gateway_resource.tasks.id
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+}
+
+resource "aws_api_gateway_method" "post_task" {
+  authorization    = "NONE"
+  http_method      = "POST"
+  resource_id      = aws_api_gateway_resource.task.id
+  rest_api_id      = aws_api_gateway_rest_api.main.id
+  api_key_required = true
+}
+
+resource "aws_api_gateway_method_response" "get_tasks_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.tasks.id
+  http_method = aws_api_gateway_method.get_tasks.http_method
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "options_tasks_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.tasks.id
+  http_method = aws_api_gateway_method.options_tasks.http_method
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration" "get_tasks" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.tasks.id
+  http_method             = aws_api_gateway_method.get_tasks.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.retrieve-todo.invoke_arn
+  credentials             = aws_iam_role.api_gateway_role.arn
+}
+
+resource "aws_api_gateway_integration_response" "get_tasks" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.tasks.id
+  http_method = aws_api_gateway_method.get_tasks.http_method
+  status_code = aws_api_gateway_method_response.get_tasks_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+}
+
+resource "aws_api_gateway_integration" "options_tasks" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.tasks.id
+  http_method             = aws_api_gateway_method.options_tasks.http_method
+  type                    = "MOCK"
+  request_templates = {
+   "application/json" = "{ \"statusCode\": 200 }"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "options_tasks" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.tasks.id
+  http_method = aws_api_gateway_method.options_tasks.http_method
+  status_code = aws_api_gateway_method_response.options_tasks_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+}
+
+resource "aws_api_gateway_integration" "post_task" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.task.id
+  http_method             = aws_api_gateway_method.post_task.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.create-todo.invoke_arn
+  credentials             = aws_iam_role.api_gateway_role.arn
+}
+
+resource "aws_api_gateway_deployment" "main" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.todo-api))
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.tasks.id,
+      aws_api_gateway_method.get_tasks.id,
+      aws_api_gateway_integration.get_tasks.id,
+      aws_api_gateway_resource.task.id,
+      aws_api_gateway_method.post_task.id,
+      aws_api_gateway_integration.post_task.id,
+    ]))
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-data "aws_iam_policy_document" "api_gateway_policy" {
-  statement {
-    effect = "Allow"
-    principals {
-      type = "*"
-      identifiers = ["*"]
-    }
-    actions   = ["execute-api:Invoke"]
-    resources = ["${aws_api_gateway_rest_api.todo-api.execution_arn}/*"]
-  }
-}
-
-resource "aws_api_gateway_rest_api_policy" "policy" {
-  rest_api_id = aws_api_gateway_rest_api.todo-api.id
-  policy = data.aws_iam_policy_document.api_gateway_policy.json
+resource "aws_api_gateway_stage" "main" {
+  deployment_id = aws_api_gateway_deployment.main.id
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  stage_name    = "prod"
 }
 
 ################################
