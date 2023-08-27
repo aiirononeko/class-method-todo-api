@@ -8,6 +8,7 @@ import {
 	GetItemCommandInput,
 	GetItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
+import { createResponse } from '../../utils/createResponse';
 
 const handler = async (
 	event: APIGatewayEvent
@@ -15,14 +16,14 @@ const handler = async (
 	/**
 	 * バリデーション
 	 */
-	if (!event.pathParameters || !event.pathParameters.todoId) {
+	if (!event.pathParameters || !event.pathParameters.taskId) {
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 400,
-			body: 'todoId in pathParameters is required.'
-		};
+		const response: APIGatewayProxyResult = createResponse(
+			400,
+			'taskId in pathParameters is required.'
+		);
 		return response;
 	}
 
@@ -35,16 +36,13 @@ const handler = async (
 	/**
 	 * 対象レコード確認
 	 */
-	const todoId = event.pathParameters?.todoId ?? '';
-	const targetData = await checkTargetRecordExists(client, todoId);
+	const taskId = event.pathParameters?.taskId ?? '';
+	const targetData = await checkTargetRecordExists(client, taskId);
 	if (!targetData.Item) {
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 404,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(404, '');
 		return response;
 	}
 
@@ -52,10 +50,10 @@ const handler = async (
 	 * クエリ作成
 	 */
 	const param: DeleteItemCommandInput = {
-		TableName: 'todos',
+		TableName: 'tasks',
 		Key: {
 			Id: {
-				S: todoId
+				S: taskId
 			}
 		}
 	};
@@ -70,10 +68,7 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 200,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(200, '');
 		return response;
 	} catch (e) {
 		console.error(e);
@@ -81,26 +76,23 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 500,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(500, '');
 		return response;
 	}
 };
 
 const checkTargetRecordExists = async (
 	client: DynamoDBClient,
-	todoId: string
+	taskId: string
 ): Promise<GetItemCommandOutput> => {
 	/**
 	 * クエリ作成
 	 */
 	const param: GetItemCommandInput = {
-		TableName: 'todos',
+		TableName: 'tasks',
 		Key: {
 			Id: {
-				S: todoId
+				S: taskId
 			}
 		}
 	};

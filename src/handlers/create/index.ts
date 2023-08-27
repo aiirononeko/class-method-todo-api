@@ -5,7 +5,8 @@ import {
 	PutItemCommand,
 	PutItemCommandInput
 } from '@aws-sdk/client-dynamodb';
-import Todo from '../../models/todo';
+import Task from '../../models/task';
+import { createResponse } from '../../utils/createResponse';
 
 interface CreateTodoParam {
 	title: string;
@@ -24,10 +25,7 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 400,
-			body: errorMessage
-		};
+		const response: APIGatewayProxyResult = createResponse(400, errorMessage);
 		return response;
 	}
 
@@ -43,7 +41,7 @@ const handler = async (
 	const requestBody: CreateTodoParam = JSON.parse(event.body ?? '');
 	const { title, content, expiration } = requestBody;
 	const param: PutItemCommandInput = {
-		TableName: 'todos',
+		TableName: 'tasks',
 		Item: {
 			Id: {
 				S: new Date().getTime().toString()
@@ -73,7 +71,7 @@ const handler = async (
 		/**
 		 * レスポンスボディ整形
 		 */
-		const responseBody: Todo = {
+		const responseBody: Task = {
 			id: param.Item?.Id.S ?? '',
 			title: param.Item?.Title.S ?? '',
 			content: param.Item?.Content.S ?? '',
@@ -84,10 +82,10 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 200,
-			body: JSON.stringify(responseBody)
-		};
+		const response: APIGatewayProxyResult = createResponse(
+			200,
+			JSON.stringify(responseBody)
+		);
 		return response;
 	} catch (e) {
 		console.error(e);
@@ -95,10 +93,7 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 500,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(500, '');
 		return response;
 	}
 };

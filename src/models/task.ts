@@ -1,4 +1,4 @@
-export default interface Todo {
+export default interface Task {
 	id: string;
 	title: string;
 	content: string;

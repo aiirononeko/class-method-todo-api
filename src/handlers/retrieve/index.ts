@@ -6,7 +6,8 @@ import {
 	ScanCommandInput,
 	ScanCommandOutput
 } from '@aws-sdk/client-dynamodb';
-import Todo from '../../models/todo';
+import Task from '../../models/task';
+import { createResponse } from '../../utils/createResponse';
 
 const handler = async (): Promise<APIGatewayProxyResult> => {
 	/**
@@ -19,7 +20,7 @@ const handler = async (): Promise<APIGatewayProxyResult> => {
 	 * クエリ作成
 	 */
 	const param: ScanCommandInput = {
-		TableName: 'todos'
+		TableName: 'tasks'
 	};
 	const command = new ScanCommand(param);
 
@@ -32,11 +33,11 @@ const handler = async (): Promise<APIGatewayProxyResult> => {
 		/**
 		 * レスポンスボディ整形
 		 */
-		const responseBody: Todo[] = [];
+		const responseBody: Task[] = [];
 		if (data.Items && data.Items.length > 0) {
 			data.Items.forEach((item) => {
 				const { Id, Title, Content, Expiration, Status } = item;
-				const todo: Todo = {
+				const todo: Task = {
 					id: Id.S ?? '',
 					title: Title.S ?? '',
 					content: Content.S ?? '',
@@ -50,15 +51,10 @@ const handler = async (): Promise<APIGatewayProxyResult> => {
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 200,
-			headers: {
-				'Access-Control-Allow-Headers': 'Content-Type',
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-			},
-			body: JSON.stringify(responseBody)
-		};
+		const response: APIGatewayProxyResult = createResponse(
+			200,
+			JSON.stringify(responseBody)
+		);
 		return response;
 	} catch (e) {
 		console.error(e);
@@ -66,10 +62,7 @@ const handler = async (): Promise<APIGatewayProxyResult> => {
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 500,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(500, '');
 		return response;
 	}
 };

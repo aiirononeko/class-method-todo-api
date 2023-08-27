@@ -8,7 +8,8 @@ import {
 	PutItemCommand,
 	PutItemCommandInput
 } from '@aws-sdk/client-dynamodb';
-import Todo from '../../models/todo';
+import Task from '../../models/task';
+import { createResponse } from '../../utils/createResponse';
 
 interface UpdateTodoParam {
 	title: string;
@@ -28,10 +29,7 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 400,
-			body: errorMessage
-		};
+		const response: APIGatewayProxyResult = createResponse(400, errorMessage);
 		return response;
 	}
 
@@ -44,16 +42,13 @@ const handler = async (
 	/**
 	 * 対象レコード確認
 	 */
-	const todoId = event.pathParameters?.todoId ?? '';
-	const targetData = await checkTargetRecordExists(client, todoId);
+	const taskId = event.pathParameters?.taskId ?? '';
+	const targetData = await checkTargetRecordExists(client, taskId);
 	if (!targetData.Item) {
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 404,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(404, '');
 		return response;
 	}
 
@@ -63,10 +58,10 @@ const handler = async (
 	const requestBody: UpdateTodoParam = JSON.parse(event.body ?? '');
 	const { title, content, expiration, status } = requestBody;
 	const param: PutItemCommandInput = {
-		TableName: 'todos',
+		TableName: 'tasks',
 		Item: {
 			Id: {
-				S: todoId
+				S: taskId
 			},
 			Title: {
 				S: title
@@ -93,7 +88,7 @@ const handler = async (
 		/**
 		 * レスポンスボディ整形
 		 */
-		const responseBody: Todo = {
+		const responseBody: Task = {
 			id: param.Item?.Id.S ?? '',
 			title: param.Item?.Title.S ?? '',
 			content: param.Item?.Content.S ?? '',
@@ -104,10 +99,10 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 200,
-			body: JSON.stringify(responseBody)
-		};
+		const response: APIGatewayProxyResult = createResponse(
+			200,
+			JSON.stringify(responseBody)
+		);
 		return response;
 	} catch (e) {
 		console.error(e);
@@ -115,10 +110,7 @@ const handler = async (
 		/**
 		 * レスポンス
 		 */
-		const response: APIGatewayProxyResult = {
-			statusCode: 500,
-			body: ''
-		};
+		const response: APIGatewayProxyResult = createResponse(500, '');
 		return response;
 	}
 };
@@ -129,9 +121,9 @@ const validate = (event: APIGatewayEvent): string | undefined => {
 			message: 'requestBody is required.'
 		});
 	}
-	if (!event.pathParameters || !event.pathParameters.todoId) {
+	if (!event.pathParameters || !event.pathParameters.taskId) {
 		return JSON.stringify({
-			message: 'todoId in pathParameters is required.'
+			message: 'taskId in pathParameters is required.'
 		});
 	}
 	const requestBody: UpdateTodoParam = JSON.parse(event.body);
@@ -155,16 +147,16 @@ const validate = (event: APIGatewayEvent): string | undefined => {
 
 const checkTargetRecordExists = async (
 	client: DynamoDBClient,
-	todoId: string
+	taskId: string
 ): Promise<GetItemCommandOutput> => {
 	/**
 	 * クエリ作成
 	 */
 	const param: GetItemCommandInput = {
-		TableName: 'todos',
+		TableName: 'tasks',
 		Key: {
 			Id: {
-				S: todoId
+				S: taskId
 			}
 		}
 	};
