@@ -526,18 +526,51 @@ resource "aws_api_gateway_deployment" "main" {
 
   triggers = {
     redeployment = sha1(jsonencode([
+      aws_api_gateway_rest_api.main.id,
       aws_api_gateway_resource.tasks.id,
       aws_api_gateway_method.get_tasks.id,
       aws_api_gateway_integration.get_tasks.id,
+      aws_api_gateway_method.options_tasks.id,
+      aws_api_gateway_integration.options_tasks.id,
       aws_api_gateway_resource.task.id,
       aws_api_gateway_method.post_task.id,
       aws_api_gateway_integration.post_task.id,
+      aws_api_gateway_method.options_task.id,
+      aws_api_gateway_integration.options_task.id,
+      aws_api_gateway_resource.task_id.id,
+      aws_api_gateway_method.put_task_task_id.id,
+      aws_api_gateway_integration.put_task_task_id.id,
+      aws_api_gateway_method.delete_task_task_id.id,
+      aws_api_gateway_integration.delete_task_task_id.id,
+      aws_api_gateway_method.options_task_task_id.id,
+      aws_api_gateway_integration.options_task_task_id.id
     ]))
   }
 
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [ 
+    aws_api_gateway_rest_api.main,
+    aws_api_gateway_resource.tasks,
+    aws_api_gateway_method.get_tasks,
+    aws_api_gateway_integration.get_tasks,
+    aws_api_gateway_method.options_tasks,
+    aws_api_gateway_integration.options_tasks,
+    aws_api_gateway_resource.task,
+    aws_api_gateway_method.post_task,
+    aws_api_gateway_integration.post_task,
+    aws_api_gateway_method.options_task,
+    aws_api_gateway_integration.options_task,
+    aws_api_gateway_resource.task_id,
+    aws_api_gateway_method.put_task_task_id,
+    aws_api_gateway_integration.put_task_task_id,
+    aws_api_gateway_method.delete_task_task_id,
+    aws_api_gateway_integration.delete_task_task_id,
+    aws_api_gateway_method.options_task_task_id,
+    aws_api_gateway_integration.options_task_task_id
+  ]
 }
 
 resource "aws_api_gateway_stage" "main" {

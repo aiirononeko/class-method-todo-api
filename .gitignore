@@ -7,3 +7,4 @@ credential.sh
 terraform/.terraform
 terraform/.terraform.lock.hcl
 terraform/dist
+terraform/terraform.tfstate
